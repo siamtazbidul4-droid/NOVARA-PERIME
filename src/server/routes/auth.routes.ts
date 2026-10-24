@@ -11,6 +11,13 @@ import { z } from 'zod';
 
 const router = Router();
 
+router.get('/config', (_req: Request, res: Response) => {
+  return res.json({
+    googleClientId: process.env.GOOGLE_CLIENT_ID?.trim() || process.env.VITE_GOOGLE_CLIENT_ID?.trim() || null,
+    facebookAppId: process.env.FACEBOOK_APP_ID?.trim() || process.env.VITE_FACEBOOK_APP_ID?.trim() || null,
+  });
+});
+
 const registrationSchema = z.object({
   name: z.string().trim().min(1).max(100),
   email: z.string().trim().email().max(254).transform((email) => email.toLowerCase()),

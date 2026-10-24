@@ -82,6 +82,7 @@ export const AuthModal: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [providerConfig, setProviderConfig] = useState({ google: '', facebook: '' });
   const [providerSdkReady, setProviderSdkReady] = useState({ google: false, facebook: false });
 
   // Form states
@@ -93,34 +94,73 @@ export const AuthModal: React.FC = () => {
     if (!authModalOpen || authModalView !== 'register') return;
 
     let active = true;
-    const providers = [
-      {
-        provider: 'google' as const,
-        configured: Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID),
-        scriptId: 'google-identity-services',
-        scriptUrl: 'https://accounts.google.com/gsi/client',
-      },
-      {
-        provider: 'facebook' as const,
-        configured: Boolean(import.meta.env.VITE_FACEBOOK_APP_ID),
-        scriptId: 'facebook-jssdk',
-        scriptUrl: 'https://connect.facebook.net/en_US/sdk.js',
-      },
-    ];
 
-    providers.forEach(({ provider, configured, scriptId, scriptUrl }) => {
-      if (!configured) {
-        setProviderSdkReady((ready) => ({ ...ready, [provider]: true }));
-        return;
-      }
-      void loadSdk(scriptId, scriptUrl)
-        .then(() => {
-          if (active) setProviderSdkReady((ready) => ({ ...ready, [provider]: true }));
-        })
-        .catch(() => {
-          if (active) setError(`${provider === 'google' ? 'Google' : 'Facebook'} sign-in could not be loaded.`);
+    const loadProviderConfig = async () => {
+      const fallbackGoogle = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+      const fallbackFacebook = import.meta.env.VITE_FACEBOOK_APP_ID || '';
+
+      try {
+        const config = await apiFetch<{ googleClientId?: string | null; facebookAppId?: string | null }>('/auth/config');
+        if (!active) return;
+
+        const nextConfig = {
+          google: config.googleClientId || fallbackGoogle,
+          facebook: config.facebookAppId || fallbackFacebook,
+        };
+        setProviderConfig(nextConfig);
+
+        const providers = [
+          {
+            provider: 'google' as const,
+            configured: Boolean(nextConfig.google),
+            scriptId: 'google-identity-services',
+            scriptUrl: 'https://accounts.google.com/gsi/client',
+          },
+          {
+            provider: 'facebook' as const,
+            configured: Boolean(nextConfig.facebook),
+            scriptId: 'facebook-jssdk',
+            scriptUrl: 'https://connect.facebook.net/en_US/sdk.js',
+          },
+        ];
+
+        providers.forEach(({ provider, configured, scriptId, scriptUrl }) => {
+          if (!configured) {
+            setProviderSdkReady((ready) => ({ ...ready, [provider]: true }));
+            return;
+          }
+          void loadSdk(scriptId, scriptUrl)
+            .then(() => {
+              if (active) setProviderSdkReady((ready) => ({ ...ready, [provider]: true }));
+            })
+            .catch(() => {
+              if (active) setError(`${provider === 'google' ? 'Google' : 'Facebook'} sign-in could not be loaded.`);
+            });
         });
-    });
+      } catch {
+        if (!active) return;
+
+        const nextConfig = {
+          google: fallbackGoogle,
+          facebook: fallbackFacebook,
+        };
+        setProviderConfig(nextConfig);
+
+        (['google', 'facebook'] as const).forEach((provider) => {
+          const configured = Boolean(provider === 'google' ? nextConfig.google : nextConfig.facebook);
+          setProviderSdkReady((ready) => ({ ...ready, [provider]: true }));
+          if (!configured) {
+            setError(
+              provider === 'google'
+                ? 'Google Sign-In requires VITE_GOOGLE_CLIENT_ID in your environment variables. Please configure your Google OAuth Client ID to authenticate.'
+                : 'Facebook Login requires VITE_FACEBOOK_APP_ID in your environment variables. Please configure your Meta App ID to authenticate.'
+            );
+          }
+        });
+      }
+    };
+
+    void loadProviderConfig();
 
     return () => {
       active = false;
@@ -238,7 +278,7 @@ export const AuthModal: React.FC = () => {
     setError(null);
     try {
       if (provider === 'google') {
-        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        const clientId = providerConfig.google || import.meta.env.VITE_GOOGLE_CLIENT_ID;
         if (!clientId) {
           setError(
             'Google Sign-In requires VITE_GOOGLE_CLIENT_ID in your environment variables. Please configure your Google OAuth Client ID to authenticate.'
@@ -279,7 +319,7 @@ export const AuthModal: React.FC = () => {
         client.requestCode();
         return;
       } else {
-        const fbAppId = import.meta.env.VITE_FACEBOOK_APP_ID;
+        const fbAppId = providerConfig.facebook || import.meta.env.VITE_FACEBOOK_APP_ID;
         if (!fbAppId) {
           setError(
             'Facebook Login requires VITE_FACEBOOK_APP_ID in your environment variables. Please configure your Meta App ID to authenticate.'

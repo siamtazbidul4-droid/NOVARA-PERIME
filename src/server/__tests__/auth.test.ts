@@ -104,6 +104,21 @@ describe('authentication safety', () => {
     });
   });
 
+  it('exposes the configured public OAuth client IDs to the frontend', async () => {
+    vi.stubEnv('NODE_ENV', 'test');
+    vi.stubEnv('GOOGLE_CLIENT_ID', 'google-public-client-id');
+    vi.stubEnv('FACEBOOK_APP_ID', 'facebook-app-id');
+
+    await withServer(async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/api/auth/config`);
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({
+        googleClientId: 'google-public-client-id',
+        facebookAppId: 'facebook-app-id',
+      });
+    });
+  });
+
   it('requires OAuth provider configuration and does not fabricate users offline', async () => {
     vi.stubEnv('NODE_ENV', 'test');
     vi.stubEnv('GOOGLE_CLIENT_ID', '');
