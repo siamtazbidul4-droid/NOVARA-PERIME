@@ -67,6 +67,8 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 app.use('/api/locations', locationRoutes);
 
+// Database availability middleware - only enforces in production
+// Development/test modes allow routes to use fallback data (e.g. SEED_PRODUCTS)
 app.use('/api', (_req: Request, res: Response, next: NextFunction) => {
   if (process.env.NODE_ENV === 'production' && !isDbConnected()) {
     return res.status(503).json({ error: 'Service unavailable: database connection is not ready.' });

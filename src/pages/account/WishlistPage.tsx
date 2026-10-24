@@ -24,7 +24,30 @@ export const WishlistPage: React.FC = () => {
       }
 
       try {
-        const res = await api.get('/products', { ids: itemIds.join(','), limit: 50 });
+        // Normalize IDs: extract string IDs from objects if necessary, filter invalid entries
+        const normalizedIds = itemIds
+          .map((item) => {
+            // If item is already a string, use it
+            if (typeof item === 'string') return item;
+            // If item is an object with _id property, extract it
+            if (item && typeof item === 'object' && '_id' in item) {
+              return String((item as any)._id);
+            }
+            // Invalid entry - skip it
+            return null;
+          })
+          .filter((id): id is string => {
+            // Keep only valid string IDs that look like MongoDB ObjectIds (24 hex chars)
+            return typeof id === 'string' && id.length === 24 && /^[0-9a-fA-F]{24}$/.test(id);
+          });
+
+        if (normalizedIds.length === 0) {
+          setProducts([]);
+          setLoading(false);
+          return;
+        }
+
+        const res = await api.get('/products', { ids: normalizedIds.join(','), limit: 50 });
         setProducts(res.products || []);
       } catch (e) {
         console.warn('Failed to load wishlist items', e);

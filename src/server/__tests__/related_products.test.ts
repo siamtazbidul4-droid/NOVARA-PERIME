@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AddressInfo } from 'node:net';
 import { app } from '../app';
 import { SEED_PRODUCTS } from '../seed/seedData';
@@ -17,7 +17,12 @@ async function withServer(run: (baseUrl: string) => Promise<void>) {
 }
 
 describe('related products API', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('returns distinct active in-stock recommendations and excludes the current product', async () => {
+    vi.stubEnv('NODE_ENV', 'test');
     const product = SEED_PRODUCTS.find((item) => item.status === 'active' && item.stock > 0);
     expect(product).toBeDefined();
 
@@ -47,6 +52,7 @@ describe('related products API', () => {
   });
 
   it('keeps related-product failures separate from the product-detail response', async () => {
+    vi.stubEnv('NODE_ENV', 'test');
     const product = SEED_PRODUCTS.find((item) => item.status === 'active');
     expect(product).toBeDefined();
 
@@ -58,6 +64,7 @@ describe('related products API', () => {
   });
 
   it('returns not found for an invalid related-product identifier', async () => {
+    vi.stubEnv('NODE_ENV', 'test');
     await withServer(async (baseUrl) => {
       const response = await fetch(`${baseUrl}/api/products/not-a-real-product/related`);
       expect(response.status).toBe(404);

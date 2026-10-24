@@ -1,0 +1,87 @@
+# Render Blueprint for Novara Commerce
+# Full-stack e-commerce platform with Express API and React SPA
+
+services:
+  # Web Service - Unified Node.js application (frontend + backend)
+  - type: web
+    name: novara-commerce
+    runtime: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+        description: "Secure random secret for JWT token signing (auto-generated)"
+      - key: SESSION_SECRET
+        generateValue: true
+        description: "Secure random secret for session management (auto-generated)"
+      - key: MONGODB_URI
+        sync: false
+        description: "MongoDB Atlas connection string (format: mongodb+srv://username:password@cluster.mongodb.net/database)"
+      - key: ADMIN_EMAIL
+        sync: false
+        description: "Environment-managed administrator email address"
+      - key: ADMIN_PASSWORD
+        sync: false
+        description: "Environment-managed administrator password (minimum 12 characters)"
+      - key: PUBLIC_API_URL
+        value: https://novara-commerce.onrender.com
+        description: "Public-facing API URL (HTTPS required for production)"
+      - key: PUBLIC_APP_URL
+        value: https://novara-commerce.onrender.com
+        description: "Public-facing application URL (HTTPS required for production)"
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+        description: "Cloudinary cloud name for image uploads (optional)"
+      - key: CLOUDINARY_API_KEY
+        sync: false
+        description: "Cloudinary API key (optional)"
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+        description: "Cloudinary API secret (optional)"
+      - key: RESEND_API_KEY
+        sync: false
+        description: "Resend API key for email notifications (optional)"
+      - key: EMAIL_FROM
+        value: orders@novaracommerce.com
+        description: "Email sender address for order notifications"
+      - key: BKASH_BASE_URL
+        value: https://tokenized.pay.bka.sh/v2/tokenized-checkout
+        description: "bKash API endpoint (sandbox: https://tokenized.sandbox.bka.sh/v2/tokenized-checkout)"
+      - key: BKASH_APP_KEY
+        sync: false
+        description: "bKash merchant app key (optional, required for bKash checkout)"
+      - key: BKASH_APP_SECRET
+        sync: false
+        description: "bKash merchant app secret (optional)"
+      - key: BKASH_USERNAME
+        sync: false
+        description: "bKash merchant username (optional)"
+      - key: BKASH_PASSWORD
+        sync: false
+        description: "bKash merchant password (optional)"
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+        description: "Google OAuth client ID (optional, for Google sign-in)"
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+        description: "Google OAuth client secret (optional)"
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false
+        description: "Google OAuth client ID for frontend (must match GOOGLE_CLIENT_ID)"
+      - key: FACEBOOK_APP_ID
+        sync: false
+        description: "Facebook app ID (optional, for Facebook sign-in)"
+      - key: FACEBOOK_APP_SECRET
+        sync: false
+        description: "Facebook app secret (optional)"
+      - key: VITE_FACEBOOK_APP_ID
+        sync: false
+        description: "Facebook app ID for frontend (must match FACEBOOK_APP_ID)"

@@ -76,7 +76,39 @@ router.get('/', async (req: Request, res: Response): Promise<any> => {
 
     if (ids) {
       const idArray = (ids as string).split(',').filter(Boolean);
-      query._id = { $in: idArray };
+      
+      // Validate MongoDB ObjectIds before querying
+      const validIds: string[] = [];
+      const invalidIds: string[] = [];
+      
+      for (const id of idArray) {
+        const trimmedId = id.trim();
+        // Check if it's a valid 24-character hexadecimal string (MongoDB ObjectId format)
+        if (trimmedId.length === 24 && /^[0-9a-fA-F]{24}$/.test(trimmedId)) {
+          validIds.push(trimmedId);
+        } else {
+          invalidIds.push(trimmedId);
+        }
+      }
+      
+      // If there are invalid IDs, log them but continue with valid ones
+      if (invalidIds.length > 0) {
+        console.warn('Invalid product IDs received:', invalidIds);
+      }
+      
+      // If no valid IDs remain, return empty result
+      if (validIds.length === 0) {
+        return res.status(400).json({ 
+          error: 'No valid product IDs provided',
+          invalidIds,
+          products: [],
+          total: 0,
+          page: 1,
+          pages: 0
+        });
+      }
+      
+      query._id = { $in: validIds };
     }
 
     if (category) {

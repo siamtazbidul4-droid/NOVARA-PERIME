@@ -5,9 +5,11 @@ import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from 'lucide-react'
 
 interface ToastCardProps {
   toast: ToastItem;
+  index: number;
+  totalCount: number;
 }
 
-const ToastCard: React.FC<ToastCardProps> = ({ toast }) => {
+const ToastCard: React.FC<ToastCardProps> = ({ toast, index, totalCount }) => {
   const dispatch = useAppDispatch();
   const [isPaused, setIsPaused] = useState(false);
   const remainingTimeRef = useRef(toast.duration || 4000);
@@ -83,6 +85,14 @@ const ToastCard: React.FC<ToastCardProps> = ({ toast }) => {
     }
   };
 
+  // Calculate dynamic z-index: newest notification gets highest z-index
+  // index 0 = oldest, index (totalCount - 1) = newest
+  const zIndex = 3001 + index;
+  
+  // Calculate vertical offset for overlapping stack
+  // Newest (highest index) at offset 0, older ones offset downward
+  const verticalOffset = (totalCount - 1 - index) * 72; // 72px spacing between overlapping toasts
+
   return (
     <div
       role="alert"
@@ -91,7 +101,12 @@ const ToastCard: React.FC<ToastCardProps> = ({ toast }) => {
       onMouseLeave={() => setIsPaused(false)}
       onFocus={() => setIsPaused(true)}
       onBlur={() => setIsPaused(false)}
-      className={`relative w-84 max-w-[calc(100vw-2rem)] rounded-xl border shadow-xl p-4 overflow-hidden transition-all transform duration-200 translate-y-0 ${getBorderColor()}`}
+      className={`absolute w-84 max-w-[calc(100vw-2rem)] rounded-xl border shadow-xl p-4 overflow-hidden transition-all duration-300 ease-out ${getBorderColor()}`}
+      style={{
+        zIndex,
+        bottom: `${verticalOffset}px`,
+        right: 0,
+      }}
     >
       <div className="flex items-start gap-3">
         <div className="pt-0.5">{getIcon()}</div>
@@ -135,10 +150,24 @@ export const ToastContainer: React.FC = () => {
   if (toasts.length === 0) return null;
 
   return (
-    <aside aria-label="Notifications" className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2.5 pointer-events-auto">
-      {toasts.map((toast) => (
-        <ToastCard key={toast.id} toast={toast} />
-      ))}
+    <aside 
+      aria-label="Notifications" 
+      className="fixed bottom-5 right-5 z-[100] pointer-events-none"
+      style={{
+        width: '336px', // w-84 = 21rem = 336px
+        maxWidth: 'calc(100vw - 2rem)',
+      }}
+    >
+      <div className="relative pointer-events-auto" style={{ height: `${Math.max(120, 72 * toasts.length)}px` }}>
+        {toasts.map((toast, index) => (
+          <ToastCard 
+            key={toast.id} 
+            toast={toast} 
+            index={index}
+            totalCount={toasts.length}
+          />
+        ))}
+      </div>
     </aside>
   );
 };
