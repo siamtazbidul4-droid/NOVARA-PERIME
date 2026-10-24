@@ -70,7 +70,7 @@ git push origin main
    - **Region**: Singapore (বা closest region)
    - **Branch**: `main`
    - **Runtime**: Node
-   - **Build Command**: `npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build`
+   - **Build Command**: `npm ci --include=dev && npm run build`
    - **Start Command**: `npm start`
    - **Plan**: Starter ($7/month) বা Free
 

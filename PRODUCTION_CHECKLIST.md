@@ -62,7 +62,7 @@ ls -la dist/
 1. [ ] Repository pushed to GitHub
 2. [ ] Render service created (Blueprint or Manual)
 3. [ ] All environment variables configured
-4. [ ] Build command: `npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build`
+4. [ ] Build command: `npm ci --include=dev && npm run build`
 5. [ ] Start command: `npm start`
 6. [ ] Health check path: `/api/health`
 7. [ ] Deploy triggered manually

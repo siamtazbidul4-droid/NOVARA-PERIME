@@ -8,7 +8,7 @@ services:
     runtime: node
     region: singapore
     plan: starter
-    buildCommand: npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:

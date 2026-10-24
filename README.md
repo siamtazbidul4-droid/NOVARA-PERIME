@@ -91,7 +91,7 @@ npm test         # Run test suite
 ### Build Commands
 ```bash
 # Build command
-npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build
+npm ci --include=dev && npm run build
 
 # Start command
 npm start

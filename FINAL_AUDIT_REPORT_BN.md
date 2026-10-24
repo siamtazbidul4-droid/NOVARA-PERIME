@@ -71,7 +71,7 @@
 **সমাধান**:
 - Complete `render.yaml` Blueprint তৈরি করা হয়েছে
 - সব প্রয়োজনীয় environment variables define করা হয়েছে
-- Build command ঠিক করা হয়েছে: `npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build`
+- Build command ঠিক করা হয়েছে: `npm ci --include=dev && npm run build`
 - Health check endpoint configured: `/api/health`
 - Auto-generated secrets (JWT_SECRET, SESSION_SECRET)
 
@@ -188,7 +188,7 @@ services:
     name: novara-commerce
     runtime: node
     region: singapore
-    buildCommand: npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
@@ -250,10 +250,8 @@ services:
 - ✅ File upload security (signature verification)
 
 **Environment Configuration**:
-- ✅ `.npmrc` configured for Windows path handling
-- ✅ Build scripts compatible with Linux (Render)
-- ✅ PowerShell script-shell for local Windows development
-- ✅ Bash script-shell for Render builds
+- ✅ npm does not pin an OS-specific script shell; each host uses its default
+- ✅ Render installs dependencies reproducibly with `npm ci --include=dev` before building
 
 ### E. Preserved Functionality
 
@@ -338,7 +336,7 @@ GET /api/health
 ### Build Configuration
 ```yaml
 Build Command:
-  npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build
+  npm ci --include=dev && npm run build
   
 Start Command:
   npm start

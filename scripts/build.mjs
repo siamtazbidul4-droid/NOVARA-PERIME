@@ -21,10 +21,6 @@ function run(command, args) {
   }
 }
 
-if (process.platform === 'win32') {
-  run('cmd.exe', ['/d', '/s', '/c', 'npx vite build']);
-} else {
-  run('/bin/bash', ['-lc', 'npx vite build']);
-}
+run(process.execPath, [path.join(rootDir, 'node_modules', 'vite', 'bin', 'vite.js'), 'build']);
 
 run(process.execPath, [path.join(rootDir, 'scripts', 'build-server.mjs')]);

@@ -158,7 +158,7 @@ dist/assets/index-Dvv-iB6b.js   539.10 kB │ gzip: 143.39 kB
 | `npm start` | `"start": "node dist/server.js"` | ✅ ম্যাচ |
 | `/api/health` | `app.get('/api/health', ...)` | ✅ ইমপ্লিমেন্টেড |
 
-**NPM_CONFIG_SCRIPT_SHELL override**: Linux compatibility-র জন্য `/bin/bash` সেট করা হয়েছে (Windows PowerShell দিয়ে তৈরি প্রজেক্ট)।
+**npm script shell**: repository-তে Windows-specific `script-shell` override নেই; platform-এর default shell ব্যবহার করা হয়।
 
 ---
 
@@ -235,7 +235,7 @@ services:
     runtime: node
     region: singapore
     plan: starter
-    buildCommand: npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
 ```

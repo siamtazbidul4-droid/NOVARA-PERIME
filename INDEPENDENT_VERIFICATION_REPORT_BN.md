@@ -538,9 +538,9 @@ Total time: ~30 seconds
 ✅ type: web (correct)
 ✅ runtime: node (correct)
 ✅ region: singapore (reasonable choice)
-✅ buildCommand: npm install && NPM_CONFIG_SCRIPT_SHELL=/bin/bash npm run build
-   - Correct: Overrides local PowerShell setting
-   - Works on Linux build environment
+✅ buildCommand: npm ci --include=dev && npm run build
+   - No Windows-specific npm shell override
+   - Linux build still requires verification in Render
 ✅ startCommand: npm start (correct)
 ✅ healthCheckPath: /api/health (exists and working)
 ```
@@ -564,9 +564,9 @@ Total time: ~30 seconds
 - ✅ `/api/health` endpoint implemented
 - ✅ PORT environment variable handled correctly
 - ✅ No hardcoded secrets
-- ✅ Build works on Linux (NPM_CONFIG_SCRIPT_SHELL override)
+- ✅ npm uses the platform-default script shell (no Windows-specific shell override)
 
-**Status**: ✅ **PASS**
+**Status**: ⚠️ **Render Linux build pending verification**
 
 ### Health Check Endpoint Verification
 
